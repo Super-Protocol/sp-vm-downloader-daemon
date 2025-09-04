@@ -69,4 +69,4 @@ class Github:
         vm_json_link = self._get_vm_json_link(release_name, assets)
         vm_json = self._get_vm_json(vm_json_link)
 
-        return models.get_release(release_name, vm_json)
+        return models.get_release_from_vm_json(release_name, vm_json), vm_json

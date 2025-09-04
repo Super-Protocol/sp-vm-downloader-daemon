@@ -32,7 +32,9 @@ def init_logging(level_str: str) -> None:
     level = getattr(logging, level_str.upper(), None)
     if level is None:
         raise Exception(f"wrong log level: {level_str}")
-    logging.basicConfig(level=level, format="%(asctime)s %(levelname)s %(message)s")
+    logging.basicConfig(
+        level=level, format="%(asctime)s [%(name)s] [%(levelname)s]: %(message)s"
+    )
 
 
 def main():
@@ -40,14 +42,19 @@ def main():
     init_logging(args.log_level)
 
     gh = github.Github()
-    ls = local_storage.LocalStorage()
-    sj = storj.StorJ()
+    ls = local_storage.LocalStorage(basedir="/var/lib/sp/images")
+    sj = storj.StorJ(
+        token="1UXqNMwov41q9TgHmyopNg5q2giQ8aTdh1gjKWKjfbWPFrcrnhenp6QZfd5ukyVnYXDx9Cok6RtnQMMnXmoZPrSUMNGZGF9KuLCzvRNmQYHowX14C2xAxtJeH6VCuNX39ist4bRE9L5VT3k41frDVh3cG1gZvsqh4EaDeaJyV6U4xVaqXqULnSb9PozqU97VVLWhfwdnj6XgUM59Wzq7yo7vn8RxwSyn8H74TEiLNGUPPA3frsYZuoqWQkNzbiYev5ByWeLro1TXo7DogD4WALCKfEmpwHs9j9rsX5WZvvZ13ourTiuZp5vTTZkByB2ibxUJqkSoZSpCNVtmDToNVKkMREVySe"
+    )
 
     while True:
         try:
-            latest_github_release = gh.get_latest_release()
-            print(latest_github_release)
+            latest_github_release, vm_json = gh.get_latest_release()
             # latest_local_release = ls.get_latest_release()
+            # print(latest_github_release)
+            temp_release_dir = sj.download_release_files(latest_github_release)
+            ls.save_release(latest_github_release, temp_release_dir, vm_json)
+            print(temp_release_dir)
 
             # if latest_github_release != latest_local_release:
             #    github_release_json = gh.download_release_json(latest_github_release)
