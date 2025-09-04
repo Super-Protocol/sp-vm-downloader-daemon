@@ -3,6 +3,7 @@ import time
 
 import logging
 
+
 def sleep_until_time(time_str: str) -> None:
     hour, minute = map(int, time_str.split(":"))
     now = dt.datetime.now().astimezone()
@@ -13,4 +14,3 @@ def sleep_until_time(time_str: str) -> None:
     s = target.strftime("%d-%m-%Y %H-%M %Z")
     logging.info(f"sleeping until {s}")
     time.sleep(sleep_sec)
-
