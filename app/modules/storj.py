@@ -60,11 +60,16 @@ class StorJ:
         self, release: models.Release
     ) -> tempfile.TemporaryDirectory:
         self.logger.info(f"downloading release: {release.name}")
+
         artifacts = release.artifacts
+
         temp_dir = tempfile.TemporaryDirectory(
             prefix="sp_downloader_", suffix=f"_{release.name}"
         )
         self.logger.debug(f"created temp dir: {temp_dir.name}")
+
         for artifact_name, artifact in artifacts.iter_fields():
+            if artifact_name != "bios":
+                continue
             self._download_artifact(temp_dir.name, release, artifact_name, artifact)
         return temp_dir

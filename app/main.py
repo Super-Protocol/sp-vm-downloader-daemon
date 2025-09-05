@@ -49,18 +49,12 @@ def main():
 
     while True:
         try:
-            latest_github_release, vm_json = gh.get_latest_release()
-            # latest_local_release = ls.get_latest_release()
-            # print(latest_github_release)
-            temp_release_dir = sj.download_release_files(latest_github_release)
-            ls.save_release(latest_github_release, temp_release_dir, vm_json)
-            print(temp_release_dir)
+            latest_github_release = gh.get_latest_release()
+            latest_local_release = ls.get_latest_release()
 
-            # if latest_github_release != latest_local_release:
-            #    github_release_json = gh.download_release_json(latest_github_release)
-            #    temp_release_files = sj.download_release_files(github_release_json)
-            #    ls.save_release(temp_release_files)
-            #    sj.remove_temp_files(temp_release_files)
+            if latest_github_release != latest_local_release:
+                temp_release_dir = sj.download_release_files(latest_github_release)
+                ls.save_release(latest_github_release, temp_release_dir)
 
             if args.onetime:
                 return
