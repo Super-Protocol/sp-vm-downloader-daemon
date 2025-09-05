@@ -66,8 +66,6 @@ def get_release_from_vm_json(release_name: str, vm_json: dict) -> Release | None
 
 def is_release_files_valid(release: Release, release_path: Path) -> bool:
     for artifact_name, artifact in release.artifacts.iter_fields():
-        if artifact_name != "bios":
-            continue
         artifact_path = release_path / Path(artifact.filename)
         if not artifact_path.is_file():
             logging.error(

@@ -20,23 +20,37 @@ class LocalStorage:
     def get_latest_release(self) -> models.Release | None:
         latest_release_name = self._get_latest_mark()
         if latest_release_name is None:
+            self.logger.info(f"no local latest releases found")
             return None
 
         release_path = Path(self.basedir) / Path(latest_release_name)
         if not release_path.is_dir():
+            self.logger.error(
+                f"locally latest release {latest_release_name} defined but {release_path} doesn't exists"
+            )
             return None
 
         vm_json = self._get_vm_json(release_path)
         if vm_json is None:
+            self.logger.error(
+                f"locally latest release {latest_release_name} defined but {vm_json} doesn't exists"
+            )
             return None
 
         release = models.get_release_from_vm_json(latest_release_name, vm_json)
         if release is None:
+            self.logger.error(
+                f"can't construct release {latest_release_name} from {vm_json}"
+            )
             return None
 
         if not models.is_release_files_valid(release, release_path):
+            self.logger.error(
+                f"some release files isn't valid for {latest_release_name}"
+            )
             return None
 
+        self.logger.debug(f"locally latest release {latest_release_name} is valid")
         return release
 
     def _save_vm_json(self, target_dir: str, vm_json: dict) -> None:
@@ -89,8 +103,6 @@ class LocalStorage:
         utils.ensure_writable_dir(target_dir)
 
         for artifact_name, artifact in release.artifacts.iter_fields():
-            if artifact_name != "bios":
-                continue
             filepath_src = Path(temp_dir.name) / Path(artifact.filename)
             filepath_dst = Path(target_dir) / Path(artifact.filename)
             self.logger.debug(f"moving file from {filepath_src} to {filepath_dst}")
@@ -99,3 +111,4 @@ class LocalStorage:
         self._save_vm_json(target_dir, release.vm_json)
         self._save_latest_mark(release.name)
         temp_dir.cleanup()
+        self.logger.info(f"successfully saved release {release.name} to {target_dir}")
