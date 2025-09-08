@@ -1,0 +1,6 @@
+Package: sp-vm-downloader-daemon
+Version: ${VERSION}
+Architecture: amd64
+Maintainer: DrunkBatya <drunkbatya.js@gmail.com>
+Description: Daemon to automatically download SuperProtocol VM images
+Depends: python3 (>= 3.9.0)

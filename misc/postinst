@@ -1,0 +1,5 @@
+#!/bin/bash
+
+systemctl daemon-reload || true
+systemctl enable sp-vm-downloader-daemon || true
+systemctl start sp-vm-downloader-daemon || true
