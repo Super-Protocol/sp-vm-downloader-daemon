@@ -9,7 +9,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-24.04
     steps:
       - name: 'Checkout code'

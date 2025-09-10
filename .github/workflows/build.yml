@@ -6,6 +6,7 @@ on:
       - dev
     tags:
       - '*'
+  pull_request:
 
 jobs:
   build:
@@ -34,6 +35,7 @@ jobs:
           VERSION=$IMAGE_TAG make
 
       - name: 'Upload Artifacts'
+        if: ${{ !github.event.pull_request }}
         uses: actions/upload-artifact@v4
         with:
           name: sp-vm-downloader-daemon_${{ steps.tag.outputs.image_tag }}-1_amd64.deb
