@@ -18,6 +18,10 @@ jobs:
           fetch-depth: 1
           ref: ${{ github.event.pull_request.head.sha }}
 
+      - name: 'Install lint tools'
+        run: |
+          python3 -m pip install -r app/lint_requirements.txt
+
       - name: 'Lint code'
         run: |
           make lint
