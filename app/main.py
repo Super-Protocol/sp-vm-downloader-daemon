@@ -4,7 +4,7 @@ import argparse
 import logging
 import time
 
-from modules import utils, github, local_storage, storj
+from modules import local_storage, github, utils, storj
 
 
 def parseArgs() -> argparse.Namespace:
@@ -12,9 +12,7 @@ def parseArgs() -> argparse.Namespace:
         description="Daemon to automatically download SuperProtocol VM images",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument(
-        "--update-time", help="Update check date and time", default="00:00"
-    )
+    parser.add_argument("--update-time", help="Update check date and time", default="00:00")
     parser.add_argument(
         "--keep-versions",
         help="How many previous versions should be keeped",
@@ -22,9 +20,7 @@ def parseArgs() -> argparse.Namespace:
         default=3,
     )
     parser.add_argument("--log-level", help="Log level", default="INFO")
-    parser.add_argument(
-        "--onetime", help="Run just now not by schedule", action="store_true"
-    )
+    parser.add_argument("--onetime", help="Run just now not by schedule", action="store_true")
     return parser.parse_args()
 
 
@@ -32,9 +28,7 @@ def init_logging(level_str: str) -> None:
     level = getattr(logging, level_str.upper(), None)
     if level is None:
         raise Exception(f"wrong log level: {level_str}")
-    logging.basicConfig(
-        level=level, format="%(asctime)s [%(name)s] [%(levelname)s]: %(message)s"
-    )
+    logging.basicConfig(level=level, format="%(asctime)s [%(name)s] [%(levelname)s]: %(message)s")
 
 
 def main():

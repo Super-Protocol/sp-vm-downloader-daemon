@@ -1,12 +1,11 @@
-from . import models
 import tempfile
 import logging
-import os
 import shutil
 import json
+import os
 from pathlib import Path
 
-from . import utils
+from . import models, utils
 
 
 class LocalStorage:
@@ -25,29 +24,21 @@ class LocalStorage:
 
         release_path = Path(self.basedir) / Path(latest_release_name)
         if not release_path.is_dir():
-            self.logger.error(
-                f"locally latest release {latest_release_name} defined but {release_path} doesn't exists"
-            )
+            self.logger.error(f"locally latest release {latest_release_name} defined but {release_path} doesn't exists")
             return None
 
         vm_json = self._get_vm_json(release_path)
         if vm_json is None:
-            self.logger.error(
-                f"locally latest release {latest_release_name} defined but {vm_json} doesn't exists"
-            )
+            self.logger.error(f"locally latest release {latest_release_name} defined but {vm_json} doesn't exists")
             return None
 
         release = models.get_release_from_vm_json(latest_release_name, vm_json)
         if release is None:
-            self.logger.error(
-                f"can't construct release {latest_release_name} from {vm_json}"
-            )
+            self.logger.error(f"can't construct release {latest_release_name} from {vm_json}")
             return None
 
         if not models.is_release_files_valid(release, release_path):
-            self.logger.error(
-                f"some release files isn't valid for {latest_release_name}"
-            )
+            self.logger.error(f"some release files isn't valid for {latest_release_name}")
             return None
 
         self.logger.debug(f"locally latest release {latest_release_name} is valid")
@@ -72,9 +63,7 @@ class LocalStorage:
             return None
 
     def _save_latest_mark(self, release_name: str) -> None:
-        self.logger.debug(
-            f"setting latest mark {release_name} to {self.latest_mark_path}"
-        )
+        self.logger.debug(f"setting latest mark {release_name} to {self.latest_mark_path}")
         with open(self.latest_mark_path, "w") as f:
             f.write(release_name)
 
@@ -85,14 +74,10 @@ class LocalStorage:
             return latest_mark
         # need to cover any not valid files, empty, or missing
         except Exception as e:
-            self.logger.debug(
-                f"failed to get latest mark file from {self.latest_mark_path}, reason: {e}"
-            )
+            self.logger.debug(f"failed to get latest mark file from {self.latest_mark_path}, reason: {e}")
             return None
 
-    def save_release(
-        self, release: models.Release, temp_dir: tempfile.TemporaryDirectory
-    ) -> None:
+    def save_release(self, release: models.Release, temp_dir: tempfile.TemporaryDirectory) -> None:
         target_dir = Path(self.basedir) / Path(release.name)
         self.logger.info(f"saving release {release.name} to {target_dir}")
 
