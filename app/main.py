@@ -46,9 +46,10 @@ def main():
             latest_github_release = gh.get_latest_release()
             latest_local_release = ls.get_latest_release()
 
-            if latest_github_release != latest_local_release:
-                temp_release_dir = sj.download_release_files(latest_github_release)
-                ls.save_release(latest_github_release, temp_release_dir)
+            if latest_github_release is not None:
+                if latest_github_release != latest_local_release:
+                    temp_release_dir = sj.download_release_files(latest_github_release)
+                    ls.save_release(latest_github_release, temp_release_dir)
 
             if args.onetime:
                 return

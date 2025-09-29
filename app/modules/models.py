@@ -5,6 +5,8 @@ from pathlib import Path
 
 from . import utils
 
+__logger__ = logging.getLogger(__name__)
+
 
 @dataclass
 class Artifact:
@@ -16,10 +18,10 @@ class Artifact:
 
 @dataclass
 class Artifacts:
-    rootfs: Artifact
+    image: Artifact
     bios: Artifact
     bios_amd: Artifact
-    root_hash: Artifact
+    rootfs_hash: Artifact
     kernel: Artifact
 
     def iter_fields(self):
@@ -52,7 +54,7 @@ def get_release_from_vm_json(release_name: str, vm_json: dict) -> Release | None
         return Release(name=release_name, artifacts=Artifacts(**artifacts), vm_json=vm_json)
 
     except Exception as e:
-        self.logger.debug(f"failed to get release {release_name} from {vm_json}, reason: {e}")
+        __logger__.error(f"failed to get release {release_name} from {vm_json}, reason: {e}")
         return None
 
 
@@ -60,10 +62,12 @@ def is_release_files_valid(release: Release, release_path: Path) -> bool:
     for artifact_name, artifact in release.artifacts.iter_fields():
         artifact_path = release_path / Path(artifact.filename)
         if not artifact_path.is_file():
-            logging.error(f"required release file {artifact_name} not found in path {release_path}")
+            __logger__.error(f"required release file {artifact_name} not found in path {release_path}")
             return False
         artifact_sha = utils.get_file_sha256(artifact_path)
         if artifact_sha != artifact.sha256:
-            logging.error(f"release file {artifact_name} in {release_path} sha differs from declareted in release json")
+            __logger__.error(
+                f"release file {artifact_name} in {release_path} sha differs from declareted in release json"
+            )
             return False
     return True

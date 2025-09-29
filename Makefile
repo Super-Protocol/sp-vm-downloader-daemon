@@ -6,24 +6,36 @@ OUTPUT=build
 SOURCE=app
 MISC=misc
 
+ARGS :=
+
 APP_NAME=sp-vm-downloader-daemon_$(VERSION)-1_amd64
 SOURCES=$(shell find $(SOURCE) -type f)
 MISC_FILES=$(shell find $(MISC) -type f)
 
 all: $(OUTPUT)/$(APP_NAME).deb
 
-$(OUTPUT)/$(APP_NAME).deb: $(SOURCES) $(MISC_FILES) Makefile
+$(OUTPUT)/venv/bin/activate: $(SOURCE)/requirements.txt $(MISC_FILES) Makefile
+	@echo -e "\tVENV\t$(OUTPUT)/venv"
+	@mkdir -p $(OUTPUT)/venv
+	@python3 -m venv $(OUTPUT)/venv
+	@source $(OUTPUT)/venv/bin/activate \
+		&& python3 -m pip install -r \
+		$(SOURCE)/requirements.txt
+
+.PHONY: run
+run: $(OUTPUT)/venv/bin/activate
+	@source $(OUTPUT)/venv/bin/activate \
+		&& python3 $(SOURCE)/main.py $(ARGS)
+
+
+$(OUTPUT)/$(APP_NAME).deb: $(SOURCES) $(OUTPUT)/venv/bin/activate
 	mkdir -p $(OUTPUT)/$(APP_NAME)/DEBIAN
 	mkdir -p $(OUTPUT)/$(APP_NAME)/usr/bin
 	mkdir -p $(OUTPUT)/$(APP_NAME)/etc/systemd/system/
-	python3 -m venv $(OUTPUT)/$(APP_NAME)/usr/bin/sp-vm-downloader-daemon
 	mkdir -p $(OUTPUT)/$(APP_NAME)/usr/bin
 	cp -Lr $(SOURCE) $(OUTPUT)/$(APP_NAME)/usr/bin/sp-vm-downloader-daemon/app
 	cp $(MISC)/sp-vm-downloader-daemon.service $(OUTPUT)/$(APP_NAME)/etc/systemd/system/sp-vm-downloader-daemon.service
-	source $(OUTPUT)/$(APP_NAME)/usr/bin/sp-vm-downloader-daemon/bin/activate \
-		&& python3 -m pip install -r \
-		$(OUTPUT)/$(APP_NAME)/usr/bin/sp-vm-downloader-daemon/app/requirements.txt
-	envsubst < $(MISC)/control > $(OUTPUT)/$(APP_NAME)/DEBIAN/control
+	VERSION="${VERSION}" envsubst '$$VERSION' < $(MISC)/control > $(OUTPUT)/$(APP_NAME)/DEBIAN/control
 	cp $(MISC)/postinst $(OUTPUT)/$(APP_NAME)/DEBIAN/
 	cp $(MISC)/prerm $(OUTPUT)/$(APP_NAME)/DEBIAN/
 	dpkg-deb --build --root-owner-group $(OUTPUT)/$(APP_NAME)

@@ -13,6 +13,7 @@ class StorJ:
 
     def _download_file(self, bucket: str, prefix: str, filename: str, dst: str) -> None:
         url = f"sj://{bucket}/{prefix}/{filename}"
+        self.logger.info(f'downloading file from `{url}`')
         cmd = [
             "/usr/local/bin/uplink",
             "cp",

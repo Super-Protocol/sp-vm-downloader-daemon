@@ -1,3 +1,4 @@
+import logging
 import json
 
 import requests
@@ -9,8 +10,10 @@ class Github:
     def __init__(self):
         self.repo = "Super-Protocol/sp-vm"
         self.latest_release_url = f"https://api.github.com/repos/{self.repo}/releases/latest"
+        self.logger = logging.getLogger(__name__)
 
     def _get_release_json(self):
+        self.logger.info(f'fetching release json')
         r = requests.get(self.latest_release_url)
         if r.status_code != 200:
             raise Exception(
@@ -43,6 +46,7 @@ class Github:
         return vm_json_link
 
     def _get_vm_json(self, vm_json_link: str):
+        self.logger.info(f'fetching vm json from `{vm_json_link}`')
         r = requests.get(vm_json_link)
         if r.status_code != 200:
             raise Exception(f"failed to get vm json from github, status code: {r.status_code}, response: {r.json()}")
@@ -50,8 +54,10 @@ class Github:
         return r.json()
 
     def get_latest_release(self) -> models.Release:
+        self.logger.info(f'fetching latest release')
         release_json = self._get_release_json()
         release_name = self._get_release_name(release_json)
+        self.logger.info(f'latest release is `{release_name}`')
         assets = self._get_assets(release_name, release_json)
         vm_json_link = self._get_vm_json_link(release_name, assets)
         vm_json = self._get_vm_json(vm_json_link)

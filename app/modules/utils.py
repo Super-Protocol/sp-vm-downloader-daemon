@@ -4,6 +4,7 @@ import hashlib
 import shutil
 import time
 import os
+from pathlib import Path
 
 
 def sleep_until_time(time_str: str) -> None:
@@ -28,8 +29,10 @@ def ensure_writable_dir(path: str):
         raise PermissionError(f"Directory {path} is now writable")
 
 
-def remove_directory_full(path: str):
-    shutil.rmtree(path)
+def remove_directory_full(path_str: str):
+    path = Path(path_str)
+    if path.is_dir():
+        shutil.rmtree(path)
 
 
 def get_file_sha256(filename: str, chunk_size: int = 100 * 1024 * 1024) -> None:
