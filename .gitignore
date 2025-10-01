@@ -2,3 +2,5 @@
 *.swp
 __pycache__
 build
+*_pb2_grpc.py
+*_pb2.py

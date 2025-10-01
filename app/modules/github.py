@@ -49,11 +49,11 @@ class Github:
         self.logger.info(f'fetching vm json from `{vm_json_link}`')
         r = requests.get(vm_json_link)
         if r.status_code != 200:
-            raise Exception(f"failed to get vm json from github, status code: {r.status_code}, response: {r.json()}")
+            raise Exception(f"failed to get vm json from github, status code: {r.status_code}, response: {r.text}")
 
         return r.json()
 
-    def get_latest_release(self) -> models.Release:
+    def get_latest_release(self) -> models.Release | None:
         self.logger.info(f'fetching latest release')
         release_json = self._get_release_json()
         release_name = self._get_release_name(release_json)
@@ -63,3 +63,8 @@ class Github:
         vm_json = self._get_vm_json(vm_json_link)
 
         return models.get_release_from_vm_json(release_name, vm_json)
+
+    def get_specific_release(self, name: str) -> models.Release | None:
+        vm_json = self._get_vm_json(f'https://github.com/{self.repo}/releases/download/{name}/vm.json')
+
+        return models.get_release_from_vm_json(name, vm_json)

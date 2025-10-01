@@ -2,9 +2,11 @@
 
 import argparse
 import logging
+import signal
 import time
+import sys
 
-from modules import local_storage, github, utils, storj
+from modules import local_storage, server, github, utils, storj
 
 
 def parseArgs() -> argparse.Namespace:
@@ -40,6 +42,16 @@ def main():
     sj = storj.StorJ(
         token="1UXqNMwov41q9TgHmyopNg5q2giQ8aTdh1gjKWKjfbWPFrcrnhenp6QZfd5ukyVnYXDx9Cok6RtnQMMnXmoZPrSUMNGZGF9KuLCzvRNmQYHowX14C2xAxtJeH6VCuNX39ist4bRE9L5VT3k41frDVh3cG1gZvsqh4EaDeaJyV6U4xVaqXqULnSb9PozqU97VVLWhfwdnj6XgUM59Wzq7yo7vn8RxwSyn8H74TEiLNGUPPA3frsYZuoqWQkNzbiYev5ByWeLro1TXo7DogD4WALCKfEmpwHs9j9rsX5WZvvZ13ourTiuZp5vTTZkByB2ibxUJqkSoZSpCNVtmDToNVKkMREVySe"
     )
+    srv = server.Server("/var/run/sp-vm-downloader.sock", gh, sj, ls)
+    srv.run()
+
+    def graceful_shutdown(sig, frame):
+        logging.warning(f'recieved signal: `{sig}`')
+        srv.stop()
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, graceful_shutdown)
+    signal.signal(signal.SIGTERM, graceful_shutdown)
 
     while True:
         try:
@@ -48,8 +60,13 @@ def main():
 
             if latest_github_release is not None:
                 if latest_github_release != latest_local_release:
-                    temp_release_dir = sj.download_release_files(latest_github_release)
-                    ls.save_release(latest_github_release, temp_release_dir)
+                    # first trying to found latest github release locally
+                    local_release = ls.get_release(latest_github_release.name)
+                    if local_release is not None:
+                        ls.save_latest_mark(local_release.name)
+                    else:
+                        temp_release_dir = sj.download_release_files(latest_github_release)
+                        ls.save_release(latest_github_release, temp_release_dir, is_latest=True)
 
             if args.onetime:
                 return

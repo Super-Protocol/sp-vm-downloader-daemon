@@ -16,32 +16,38 @@ class LocalStorage:
         utils.ensure_writable_dir(self.basedir)
         self.latest_mark_path = Path(self.basedir) / Path("latest")
 
+    def get_release_path(self, release_name: str) -> Path | None:
+        return Path(self.basedir) / Path(release_name)
+
     def get_latest_release(self) -> models.Release | None:
         latest_release_name = self._get_latest_mark()
-        if latest_release_name is None:
-            self.logger.info(f"no local latest releases found")
+        return self.get_release(latest_release_name)
+
+    def get_release(self, release_name: str) -> models.Release | None:
+        if release_name is None:
+            self.logger.info(f"release name is None..")
             return None
 
-        release_path = Path(self.basedir) / Path(latest_release_name)
+        release_path = Path(self.basedir) / Path(release_name)
         if not release_path.is_dir():
-            self.logger.error(f"locally latest release {latest_release_name} defined but {release_path} doesn't exists")
+            self.logger.error(f"local release: `{release_name}` defined but `{release_path}` doesn't exists")
             return None
 
         vm_json = self._get_vm_json(release_path)
         if vm_json is None:
-            self.logger.error(f"locally latest release {latest_release_name} defined but {vm_json} doesn't exists")
+            self.logger.error(f"local release: `{release_name}` defined but `{vm_json}` doesn't exists")
             return None
 
-        release = models.get_release_from_vm_json(latest_release_name, vm_json)
+        release = models.get_release_from_vm_json(release_name, vm_json)
         if release is None:
-            self.logger.error(f"can't construct release {latest_release_name} from {vm_json}")
+            self.logger.error(f"can't construct release: `{release_name}` from `{vm_json}`")
             return None
 
         if not models.is_release_files_valid(release, release_path):
-            self.logger.error(f"some release files isn't valid for {latest_release_name}")
+            self.logger.error(f"some release files isn't valid for: `{release_name}`")
             return None
 
-        self.logger.debug(f"locally latest release {latest_release_name} is valid")
+        self.logger.debug(f"local release: `{release_name}` is valid")
         return release
 
     def _save_vm_json(self, target_dir: str, vm_json: dict) -> None:
@@ -62,7 +68,7 @@ class LocalStorage:
             self.logger.debug(f"failed to get vm.json from {target_dir}, reason: {e}")
             return None
 
-    def _save_latest_mark(self, release_name: str) -> None:
+    def save_latest_mark(self, release_name: str) -> None:
         self.logger.debug(f"setting latest mark {release_name} to {self.latest_mark_path}")
         with open(self.latest_mark_path, "w") as f:
             f.write(release_name)
@@ -77,7 +83,9 @@ class LocalStorage:
             self.logger.debug(f"failed to get latest mark file from {self.latest_mark_path}, reason: {e}")
             return None
 
-    def save_release(self, release: models.Release, temp_dir: tempfile.TemporaryDirectory) -> None:
+    def save_release(
+        self, release: models.Release, temp_dir: tempfile.TemporaryDirectory, is_latest: bool = False
+    ) -> None:
         target_dir = Path(self.basedir) / Path(release.name)
         self.logger.info(f"saving release {release.name} to {target_dir}")
 
@@ -94,6 +102,7 @@ class LocalStorage:
             shutil.move(filepath_src, filepath_dst)
 
         self._save_vm_json(target_dir, release.vm_json)
-        self._save_latest_mark(release.name)
+        if is_latest:
+            self.save_latest_mark(release.name)
         temp_dir.cleanup()
         self.logger.info(f"successfully saved release {release.name} to {target_dir}")
