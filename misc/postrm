@@ -1,3 +1,8 @@
 #!/bin/bash
 
-rm -rf /usr/bin/sp-vm-downloader-daemon;
+case "$1" in
+    purge)
+        rm -rf /usr/bin/sp-vm-downloader-daemon;
+        systemctl daemon-reload || true
+        ;;
+esac
