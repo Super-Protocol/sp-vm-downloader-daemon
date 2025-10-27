@@ -74,7 +74,7 @@ format: $(VENV_FILE)
 			--line-length=120 --extend-exclude '.*_pb2(_grpc)?\.py' .
 
 .PHONY: lint
-lint: $(VENV_FILE)
+lint: $(VENV_FILE) $(PROTO_DST)
 	@source $(VENV_FILE) && \
 		python3 -m isort --profile black --length-sort --reverse-sort \
 			--multi-line 3 --skip-glob '*_pb2.py' --skip-glob '*_pb2_grpc.py' --check --diff .
