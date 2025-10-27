@@ -42,6 +42,15 @@ class ServerServicer(sp_vm_downloader_pb2_grpc.SpVmDownloaderServicer):
         except Exception as e:
             return sp_vm_downloader_pb2.ReleaseReply(path="", msg=str(e), success=False)
 
+    def GetLatestGithubReleaseName(self, request, context) -> sp_vm_downloader_pb2.LatestGithubReleaseNameReply:
+        try:
+            github_release = self.gh.get_latest_release()
+            if github_release is None:
+                raise Exception(f'github latest release not found')
+            return sp_vm_downloader_pb2.LatestGithubReleaseNameReply(name=github_release.name, msg="", success=True)
+        except Exception as e:
+            return sp_vm_downloader_pb2.LatestGithubReleaseNameReply(name="", msg=str(e), success=False)
+
 
 class Server:
     def __init__(self, socket_path_str: str, gh: Github, sj: StorJ, ls: LocalStorage):
