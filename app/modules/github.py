@@ -14,7 +14,7 @@ class Github:
 
     def _get_release_json(self):
         self.logger.info(f'fetching release json')
-        r = requests.get(self.latest_release_url)
+        r = requests.get(self.latest_release_url, timeout=120)
         if r.status_code != 200:
             raise Exception(
                 f"failed to get latest release from github, status code: {r.status_code}, response: {r.json()}"
@@ -40,14 +40,12 @@ class Github:
             None,
         )
         if vm_json_link is None:
-            raise Exception(
-                f"failed to get download link from github release: {release_name}, response: {release_json}"
-            )
+            raise Exception(f"failed to get download link from github release: {release_name}, assets: {assets}")
         return vm_json_link
 
     def _get_vm_json(self, vm_json_link: str):
         self.logger.info(f'fetching vm json from `{vm_json_link}`')
-        r = requests.get(vm_json_link)
+        r = requests.get(vm_json_link, timeout=120)
         if r.status_code != 200:
             raise Exception(f"failed to get vm json from github, status code: {r.status_code}, response: {r.text}")
 

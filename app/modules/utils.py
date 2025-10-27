@@ -26,7 +26,7 @@ def sleep_until_time(time_str: str) -> None:
 def ensure_writable_dir(path: str):
     os.makedirs(path, exist_ok=True)
     if not os.access(path, os.W_OK):
-        raise PermissionError(f"Directory {path} is now writable")
+        raise PermissionError(f"Directory {path} is not writable")
 
 
 def remove_directory_full(path_str: str):
@@ -35,7 +35,7 @@ def remove_directory_full(path_str: str):
         shutil.rmtree(path)
 
 
-def get_file_sha256(filename: str, chunk_size: int = 100 * 1024 * 1024) -> None:
+def get_file_sha256(filename: str, chunk_size: int = 100 * 1024 * 1024) -> str:
     h = hashlib.sha256()
     with open(filename, "rb") as f:
         for chunk in iter(lambda: f.read(chunk_size), b""):

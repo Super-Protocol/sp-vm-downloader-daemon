@@ -67,7 +67,7 @@ def is_release_files_valid(release: Release, release_path: Path) -> bool:
         artifact_sha = utils.get_file_sha256(artifact_path)
         if artifact_sha != artifact.sha256:
             __logger__.error(
-                f"release file {artifact_name} in {release_path} sha differs from declareted in release json"
+                f"release file {artifact_name} in {release_path} sha differs from declared in release json"
             )
             return False
     return True

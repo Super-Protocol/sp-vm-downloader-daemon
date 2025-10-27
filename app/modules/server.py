@@ -81,12 +81,11 @@ class Server:
         self.logger.info(f'server is started on `{self.socket_path}`')
 
     def stop(self) -> None:
-        if self.server is None:
+        if self.server is not None:
             self.logger.info(f'stopping server on `{self.socket_path}`, timeout: `{self.stop_timeout}`')
             self.server.stop(self.stop_timeout)
+            self.server = None
 
         if self.socket_path.exists():
             self.logger.info(f'removing socket `{self.socket_path}`')
             self.socket_path.unlink()
-
-        self.server = None
