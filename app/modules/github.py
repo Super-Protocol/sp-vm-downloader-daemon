@@ -1,5 +1,6 @@
 import logging
 import json
+from typing import Any
 
 import requests
 
@@ -34,7 +35,7 @@ class Github:
             raise Exception(f"failed to get assets from github release: {release_name}, response: {release_json}")
         return assets
 
-    def _get_vm_json_link(self, release_name: str, assets: dict) -> str:
+    def _get_vm_json_link(self, release_name: str, assets: list[dict[Any, Any]]) -> str:
         vm_json_link = next(
             iter([x.get("browser_download_url", None) for x in assets if x.get("name", None) == "vm.json"]),
             None,

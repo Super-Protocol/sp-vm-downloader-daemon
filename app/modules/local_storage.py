@@ -23,7 +23,7 @@ class LocalStorage:
         latest_release_name = self._get_latest_mark()
         return self.get_release(latest_release_name)
 
-    def get_release(self, release_name: str) -> models.Release | None:
+    def get_release(self, release_name: str | None) -> models.Release | None:
         if release_name is None:
             self.logger.info(f"release name is None..")
             return None
@@ -90,10 +90,10 @@ class LocalStorage:
         self.logger.info(f"saving release {release.name} to {target_dir}")
 
         self.logger.debug(f"removing {target_dir}")
-        utils.remove_directory_full(target_dir)
+        utils.remove_directory_full(str(target_dir))
 
         self.logger.debug(f"creating {target_dir}")
-        utils.ensure_writable_dir(target_dir)
+        utils.ensure_writable_dir(str(target_dir))
 
         for artifact_name, artifact in release.artifacts.iter_fields():
             filepath_src = Path(temp_dir.name) / Path(artifact.filename)
@@ -101,7 +101,7 @@ class LocalStorage:
             self.logger.debug(f"moving file from {filepath_src} to {filepath_dst}")
             shutil.move(filepath_src, filepath_dst)
 
-        self._save_vm_json(target_dir, release.vm_json)
+        self._save_vm_json(str(target_dir), release.vm_json)
         if is_latest:
             self.save_latest_mark(release.name)
         temp_dir.cleanup()

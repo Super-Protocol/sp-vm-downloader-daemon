@@ -34,13 +34,13 @@ class StorJ:
         release: models.Release,
         artifact_name: str,
         artifact: models.Artifact,
-    ) -> tempfile.NamedTemporaryFile:
+    ) -> None:
         self.logger.info(f"downloading artifact: {artifact_name} for release: {release.name}")
         filename = Path(directory) / Path(artifact.filename)
-        self._download_file(artifact.bucket, artifact.prefix, artifact.filename, filename)
+        self._download_file(artifact.bucket, artifact.prefix, artifact.filename, str(filename))
         self.logger.debug(f"succesfully downloaded: {artifact_name} for release: {release.name}")
         self.logger.debug(f"verifying sha256 for: {artifact_name} for release: {release.name}")
-        downloaded_file_sha256 = utils.get_file_sha256(filename)
+        downloaded_file_sha256 = utils.get_file_sha256(str(filename))
         if downloaded_file_sha256 != artifact.sha256:
             raise Exception(
                 f"downloaded file sha256 isn't match, expected: {artifact.sha256}, actual: {downloaded_file_sha256}"

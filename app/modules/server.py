@@ -17,14 +17,14 @@ class ServerServicer(sp_vm_downloader_pb2_grpc.SpVmDownloaderServicer):
         self.sj = sj
         self.ls = ls
 
-    def GetRelease(self, request, context) -> sp_vm_downloader_pb2.ReleaseReply:
+    def GetRelease(self, request, context) -> sp_vm_downloader_pb2.ReleaseReply:  # type: ignore[name-defined]
         self.logger.info(f'received request for release: `{request.name}`')
         try:
             local_release = self.ls.get_release(request.name)
             if local_release is not None:
                 path = self.ls.get_release_path(request.name)
                 self.logger.info(f'found local valid release: `{request.name}`')
-                return sp_vm_downloader_pb2.ReleaseReply(path=str(path), msg="", success=True)
+                return sp_vm_downloader_pb2.ReleaseReply(path=str(path), msg="", success=True)  # type: ignore[attr-defined]
 
             self.logger.info(f'searching github release: `{request.name}`')
             github_release = self.gh.get_specific_release(request.name)
@@ -38,18 +38,18 @@ class ServerServicer(sp_vm_downloader_pb2_grpc.SpVmDownloaderServicer):
             self.logger.info(f'saving release from github: `{request.name}`')
             self.ls.save_release(github_release, temp_release_dir, is_latest=is_latest)
             path = self.ls.get_release_path(request.name)
-            return sp_vm_downloader_pb2.ReleaseReply(path=str(path), msg="", success=True)
+            return sp_vm_downloader_pb2.ReleaseReply(path=str(path), msg="", success=True)  # type: ignore[attr-defined]
         except Exception as e:
-            return sp_vm_downloader_pb2.ReleaseReply(path="", msg=str(e), success=False)
+            return sp_vm_downloader_pb2.ReleaseReply(path="", msg=str(e), success=False)  # type: ignore[attr-defined]
 
-    def GetLatestGithubReleaseName(self, request, context) -> sp_vm_downloader_pb2.LatestGithubReleaseNameReply:
+    def GetLatestGithubReleaseName(self, request, context) -> sp_vm_downloader_pb2.LatestGithubReleaseNameReply:  # type: ignore[name-defined]
         try:
             github_release = self.gh.get_latest_release()
             if github_release is None:
                 raise Exception(f'github latest release not found')
-            return sp_vm_downloader_pb2.LatestGithubReleaseNameReply(name=github_release.name, msg="", success=True)
+            return sp_vm_downloader_pb2.LatestGithubReleaseNameReply(name=github_release.name, msg="", success=True)  # type: ignore[attr-defined]
         except Exception as e:
-            return sp_vm_downloader_pb2.LatestGithubReleaseNameReply(name="", msg=str(e), success=False)
+            return sp_vm_downloader_pb2.LatestGithubReleaseNameReply(name="", msg=str(e), success=False)  # type: ignore[attr-defined]
 
 
 class Server:
@@ -73,11 +73,11 @@ class Server:
         if self.socket_path.exists():
             self.socket_path.unlink()
 
-        self.server = grpc.server(self.pool)
-        self.server.add_insecure_port(f"unix://{self.socket_path}")
+        self.server = grpc.server(self.pool)  # type: ignore[assignment]
+        self.server.add_insecure_port(f"unix://{self.socket_path}")  # type: ignore[attr-defined]
         sp_vm_downloader_pb2_grpc.add_SpVmDownloaderServicer_to_server(self.servicier, self.server)
 
-        self.server.start()
+        self.server.start()  # type: ignore[attr-defined]
         self.logger.info(f'server is started on `{self.socket_path}`')
 
     def stop(self) -> None:
