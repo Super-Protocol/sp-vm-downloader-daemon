@@ -16,6 +16,8 @@ LIB_FILES=$(shell find $(LIB) -type f)
 VENV_DIR=$(OUTPUT)/$(APP_NAME)/usr/bin/sp-vm-downloader-daemon
 VENV_FILE=$(VENV_DIR)/bin/activate
 
+LIBS=$(LIB)/sp-vm-proto/proto/sp_vm_downloader.proto
+
 PROTO_DIR=$(LIB)/sp-vm-proto/proto
 PROTO_GEN_DIR=$(SOURCE)/modules/proto
 PROTO_SRC=$(PROTO_DIR)/sp_vm_downloader.proto
@@ -25,7 +27,11 @@ PROTO_FIXER=$(LIB)/sp-vm-proto/scripts/fix_proto_imports.py
 
 all: $(OUTPUT)/$(APP_NAME).deb
 
-$(VENV_FILE): $(SOURCE)/requirements.txt $(MISC_FILES) $(LIB_FILES) Makefile
+$(LIBS):
+	@echo -e "\tSUBMODULE\t$(LIBS)"
+	@git submodule update --init
+
+$(VENV_FILE): $(LIBS) $(SOURCE)/requirements.txt $(MISC_FILES) $(LIB_FILES) Makefile
 	@echo -e "\tVENV\t$(VENV_DIR)"
 	@mkdir -p $(VENV_DIR)
 	@python3 -m venv $(VENV_DIR)
