@@ -1,0 +1,4 @@
+#!/bin/bash
+
+systemctl stop sp-vm-downloader-daemon || true;
+systemctl disable sp-vm-downloader-daemon || true
